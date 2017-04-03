@@ -1,20 +1,10 @@
-version: '2'
+version: '3'
 services:
-  consume:
-    image: consume
-    build:
-      context: .
-      dockerfile: dockerfiles/consume/Dockerfile
-    depends_on:
-      - build
   build:
     image: build
     volumes:
       - /tmp/outside:/tmp/inside
-#    command:
-#      - cp /foo/dockertest.txt /tmp/inside/dockertest.txt
     build:
       context: .
       dockerfile: dockerfiles/build/Dockerfile
-volumes:
-  data:
+    
