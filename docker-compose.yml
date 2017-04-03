@@ -4,7 +4,10 @@ services:
     image: build
     volumes:
       - /tmp/outside:/tmp/inside
+
+    command: cp foo/dockertest.txt /tmp/inside/dockertest.txt
     build:
       context: .
       dockerfile: dockerfiles/build/Dockerfile
-    
+volumes:
+  data:
