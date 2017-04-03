@@ -21,3 +21,18 @@ meister@MacBook-Pro-2 Dock$
 ```
 
 It's madness I tell you - madness!
+
+When I do this:
+```
+docker run -v /tmp/outside:/tmp/inside -it ubuntu
+]0;root@5ff854488c54: /root@5ff854488c54:/# mount
+]0;root@5ff854488c54: /root@5ff854488c54:/# mount
+... lots of entries ...
+osxfs on /tmp/inside type fuse.osxfs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=1048576)
+... lots of entries ...
+]0;root@5ff854488c54: /root@5ff854488c54:/# 
+```
+
+I see an 'osxfs' file system mounted on /tmp/inside.
+
+When I run 'mount' from within the Dockerfile invoked by docker-compose - there are no osxfs file systems mounted anywhere. WTH?
