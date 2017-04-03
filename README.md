@@ -17,22 +17,27 @@ touch /tmp/inside/a
 ]0;root@c1b8929d0e28: /root@c1b8929d0e28:/# exit
 meister@MacBook-Pro-2 Dock$ ls /tmp/outside
 a
-meister@MacBook-Pro-2 Dock$ 
+meister@MacBook-Pro-2 Dock$
 ```
 
 It's madness I tell you - madness!
 
-When I do this:
-```
-docker run -v /tmp/outside:/tmp/inside -it ubuntu
-]0;root@5ff854488c54: /root@5ff854488c54:/# mount
-]0;root@5ff854488c54: /root@5ff854488c54:/# mount
-... lots of entries ...
-osxfs on /tmp/inside type fuse.osxfs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=1048576)
-... lots of entries ...
-]0;root@5ff854488c54: /root@5ff854488c54:/# 
-```
 
-I see an 'osxfs' file system mounted on /tmp/inside.
+----
 
-When I run 'mount' from within the Dockerfile invoked by docker-compose - there are no osxfs file systems mounted anywhere. WTH?
+**The Method behind the Madness**
+
+
+The reason this didn't work before is that you can't mount a host volume during the build stage. Your attempts to create a file in `/tmp/inside` were successful during the build, but that entire directory became unavailable at the time the `command` was executed, because its place in the filesystem hierarchy was overridden with the volume mount!
+
+The committed changes enable the following with only `git` and `docker-compose` installed:
+
+    git clone https://github.com/drmeister/docker-fail.git docker-success
+    cd docker-success
+    docker-compose run build
+    cat /tmp/outside/dockertest.txt
+
+
+When `docker build ...` is run, the docker client uploads _only the context directory_ (the argument passed to `docker build`) to the docker server. So for the purposes of all `RUN` directives in the `Dockerfile`, _only_ stuff within the build context directory is accessible. Recall that there is no `-v` parameter when using `docker build`. Basically, `docker-compose` just sites on top of the regular docker client, as a workflow tool, so it can't do anything you can't do yourself with manual steps.
+
+ Now, when you use `docker run`, or when `docker-compose` does the same thing, you _can_ mount a volume. So in short, the host volume _is_ available when the `command` specified in the `docker-compose` file is run, but not when any of the `RUN` directives are processed during the `docker build...`.
